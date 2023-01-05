@@ -48,7 +48,59 @@ ui <- dashboardPage(
   dashboardBody(
     tabItems(
       
-      
+      # 1. Lecture de la donnée
+      tabItem(tabName = "readData",
+              h1("Lecture des données"),
+              
+              fileInput("dataFile",label = NULL,
+                        buttonLabel = "Browse...",
+                        placeholder = "No file selected"),
+              fluidRow(
+                column(3,
+                       h3("Parameters"),
+                       
+                       # Choix si la data contient une en tete
+                       radioButtons(inputId = "header", 
+                                    label = "Header",
+                                    choices = c("Yes" = TRUE,
+                                                "No" = FALSE),
+                                    selected = TRUE, inline=T),
+                       
+                       # # Choix du séparateur
+                       radioButtons(inputId = "sep", 
+                                    label = "Separator",
+                                    choices = c(Comma = ",",
+                                                Semicolon = ";",
+                                                Tab = "\t"),
+                                    selected = "\t", inline=T),
+                       
+                       # Choix de la quote
+                       radioButtons(inputId = "quote", 
+                                    label= "Quote",
+                                    choices = c(None = "",
+                                                "Double Quote" = '"',
+                                                "Single Quote" = "'"),
+                                    selected = "", inline=T),
+                       
+                       
+                       
+                       
+                       
+                ),
+                # Une preview de la donnée séléctionnée
+                column(9,
+                       h3("File preview"),
+                       dataTableOutput(outputId = "preview")
+                )
+              ), 
+              # Button permettant de valider le choix de la donnée et
+              # déclenchant le reste des analyses.
+              div(actionButton(inputId = "actBtnVisualisation", label = "Visualisation",icon = icon("play") ), align = "center"),
+              
+              
+              
+              
+      ),     
       
       
     )
