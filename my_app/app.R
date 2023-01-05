@@ -100,7 +100,54 @@ ui <- dashboardPage(
               
               
               
-      ),     
+      ),
+      #2. Visualization des tables de l'analyse de donnés
+      tabItem(tabName = "visualization",
+              h1("Visualisation des données"),
+              
+              
+              mainPanel(
+                tabsetPanel(
+                  tabPanel( title = "visualisation",uiOutput("myoutput")
+                  ),
+                  # Résumé de la donnée
+                  tabPanel(title ="summary",
+                           verbatimTextOutput("summary")
+                  ),
+                  # Pourcentage des valeurs manquantes
+                  tabPanel( "pourcentage de données manquantes" 
+                            ,plotOutput(outputId="NAN")),
+                  # Distribution des variables
+                  tabPanel("Variables qualitatives",plotOutput(outputId="Plotbar")),
+                  tabPanel("variables quantitatives",plotOutput(outputId="Plothisto")),
+                  
+                  # Corrélation entre les variales quantitatives
+                  tabPanel("correlation",plotOutput(outputId="PlotCorrQuatita")),
+                  # AOVA pour les variables qualitatives
+                  tabPanel("ANOVA", sidebarLayout(
+                    sidebarPanel(
+                      selectInput(
+                        inputId = "variable",
+                        label = "Enter la variable ",
+                        choices=NULL
+                        
+                      ),
+                      actionButton(
+                        inputId = "soumettre",
+                        label = "soumettre"
+                      )
+                    ),
+                    mainPanel(  
+                      plotOutput(outputId="PlotBot")
+                    )
+                  ))
+                  
+                )),
+              
+              
+              
+              
+      ),  
       
       
     )
