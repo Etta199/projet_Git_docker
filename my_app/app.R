@@ -148,6 +148,95 @@ ui <- dashboardPage(
               
               
       ),  
+      # 3. Volets Prédictions : Entrainement et affichage de résultats pour  modèles :
+      tabItem(tabName = "prediction",
+              h1("Modeles de predictions"),
+              selectInput(
+                # Tout d'abord, choix de la variable target à utiliser
+                inputId = "variabletarget",
+                label = "Enter la variable target ",
+                choices=NULL
+                
+              ),
+              # Button pour soumettre le choix de la variable
+              actionButton(
+                inputId = "soumettre1",
+                label = "soumettre"
+              ), 
+              
+              tabPanel("Prediction", 
+                       navbarPage("Models",
+                                  # 3.1 Modèle Decision Tree
+                                  tabPanel("Decision Tree", 
+                                           fluidRow(
+                                             #Matrice de confusion
+                                             column(6, h3("Matrice de confusion"),
+                                                    plotOutput(outputId="dt")),
+                                             
+                                             column(6, h3("Métriques d'évaluation"),
+                                                    tableOutput(outputId = "dt2")
+                                             )
+                                           ),
+                                           # Courbe ROC
+                                           fluidRow(
+                                             column(8, h3('Courbe ROC'),
+                                                    plotOutput(outputId = "dt3")
+                                             )
+                                             
+                                           ),
+                                           # Importance de variables
+                                           fluidRow(
+                                             column(8, h3('Features Important'),
+                                                    plotOutput(outputId = "dt4")
+                                             )
+                                           )  
+                                  ),
+                                  # 3.2 Random Forest
+                                  tabPanel("random forest", 
+                                           fluidRow(
+                                             column(6, h3("Matrice de confusion"),
+                                                    plotOutput(outputId="lr")),
+                                             
+                                             column(6, h3("Métriques d'évaluation"),
+                                                    tableOutput(outputId = "lr2")
+                                             )
+                                           ),
+                                           fluidRow(
+                                             column(8, h3('Courbe ROC'),
+                                                    plotOutput(outputId = "lr3")
+                                             )
+                                             
+                                           ),
+                                           fluidRow(
+                                             column(8, h3('Features Important'),
+                                                    plotOutput(outputId = "lr4")
+                                             )
+                                             
+                                           )
+                                  ),
+                                  # 3.3 Modèle Naive Bayes
+                                  tabPanel("Naive Bayes", 
+                                           fluidRow(
+                                             column(6, h3("Confusion Matrix"),
+                                                    plotOutput(outputId="nb")),
+                                             
+                                             column(6, h3('Evaluation Metrics'),
+                                                    tableOutput(outputId = "nb2")
+                                             )
+                                           ),
+                                           fluidRow(
+                                             column(8, h3('ROC Curve'),
+                                                    plotOutput(outputId = "nb3")
+                                             )
+                                             
+                                           )
+                                  )
+                       )
+              )        
+              
+              
+              
+      )
       
       
     )
