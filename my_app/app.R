@@ -253,7 +253,118 @@ server <- function(input, output,session) {
 ############partieWessal
 
 
-
+  data <- reactiveValues()
+  output$preview <-  renderDataTable({
+    
+    req(input$dataFile)
+    
+    df <- read.csv(input$dataFile$datapath,
+                   header = as.logical(input$header),
+                   sep = input$sep,
+                   quote = input$quote,
+                   stringsAsFactors = TRUE,
+                   nrows=10
+    )
+    
+  },  options = list(scrollX = TRUE , dom = 't'))
+  
+  oko= reactiveValues(types = list())
+  typesAjour=reactiveValues(types=list())
+  lestypes = reactiveValues(types = c()) 
+  
+  ##########################################################################################
+  output$files <- renderTable({head(data$table)})
+  output$tabType<-renderTable({Types()})
+  
+  
+  Types<-reactiveVal({NULL})
+  
+  type_stat_f<-function(x){
+    
+    
+    newtype<-c()
+    k=1
+    for(i in x){
+      if(i=="numeric"){
+        oko$types[k]="quantitative continue"
+        newtype<-c(newtype,"quantitative continue")
+        
+      } else {
+        oko$types[k]="qualitative nominale"
+        newtype<-c(newtype,"qualitative nominale")
+      }
+      k=k+1
+    }
+    newtype
+  }
+  
+  # L'execution de pluesieurs action après la validation du choix de la données :
+  observeEvent(input$actBtnVisualisation, {
+    
+    if(!is.null(input$dataFile$datapath)){
+      # Lecture de données et son stockage dans une variable
+      data$table = read.csv(input$dataFile$datapath,
+                            header = as.logical(input$header),
+                            sep = input$sep,
+                            quote = input$quote)
+      #Affichage d'un message de réussite
+      sendSweetAlert(
+        session = session,
+        title = "Done !",
+        text = "Le fichier a bien été lu !",
+        type = "success"
+      )
+      
+      #visualisation
+      updateTabItems(session, "tabs", selected = "visualization")
+      ## Choix le nom des variables à considérer pour l'ANOVA
+      updateSelectInput(inputId = "variable",choices = colnames(data$table))
+      ## Choix le nom des variables à considérer pour la variable target
+      updateSelectInput(inputId = "variabletarget",choices = colnames(data$table))
+      Type<-sapply(data$table, class)
+      lestypes$types<- type_stat_f(Type)
+    }
+    
+    #############################
+    
+    # Partie responsable de l'actualisation des types de variables en fonction 
+    # des choix de l'utilisateur
+    nomvar<-reactiveValues(names=c())
+    Types<-reactiveVal({NULL})
+    observeEvent(input$dataFile, {
+      req(input$dataFile)
+      d1<-as.data.frame(data$table)
+      Nom_variable<-c()
+      Type<-sapply(d1, class)
+      for(i in colnames(d1)){
+        Nom_variable<-c(Nom_variable,i)
+      }
+      typest<-lestypes$types
+      
+      selecttype<-c()
+      k=1
+      for(ii in typest){
+        
+        selecttype<-c(selecttype,as.character(selectInput(inputId=paste0("row_select_", k), label=NULL,selected = ii, choices=c("Qualitative nominale"="qualitative nominale", "qualitative ordinal" = "Qualitative ordinal","quantitative discrete" = "quantitative discrete","quantitative continue" = "quantitative continue"))))
+        k=k+1
+      }
+      d2<-data.frame(Nom_variable,Type)
+      setDT(d2)
+      d2<-data.frame(d2,lestypes$types,selecttype)
+      Types(d2)
+    })
+    
+    observeEvent(input$sauvegarde, {
+      rvs$observers = lapply(
+        1, 
+        function(i) {
+          observeEvent(input[["sauvegarde"]], 
+                       changerr()
+          )
+        }
+      )
+    })
+    
 
 
 
