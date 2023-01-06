@@ -260,5 +260,100 @@ server <- function(input, output,session) {
 ############partieChaimae
   
   
+  # Fonctions qui gére les classifications
+  
+  ################ random forest ################
+  random_frst <- function(arg=NULL){
+    
+    #make this example reproducible
+    set.seed(1)
+    
+    #Use 80% of dataset as training set and remaining 30% as testing set
+    sample <- sample(c(TRUE, FALSE), nrow(data$table), replace=TRUE, prob=c(0.8,0.2))
+    ###traitement donnees manquante pour rdf
+    train <- data$table[sample, ]
+    test <- data$table[!sample, ]
+    df.rf=randomForest(as.formula(paste(input$variabletarget," ~ .")),train,importance=TRUE)
+    
+    
+    
+    
+    
+    predict_rdf <- predict(df.rf,test,type='class')
+    
+    predict_rdf=round(predict_rdf,0)
+    
+    
+    table = table(test[, input$variabletarget], predict_rdf)
+    
+    
+    Precision = table[1, 1] / sum(table[,1])
+    
+    Recall = table[1, 1] / sum(table[1,])
+    Specificity = table[2, 2] / sum(table[2,])
+    
+    f1 = 2 * Precision * Recall / (Precision + Recall)
+    
+    missing_classerr <- mean(predict_rdf != test[, input$variabletarget])
+    Accuracy = 1 - missing_classerr
+    
+    if (is.null(arg)){
+      
+      tablo <- data.frame(table(test$target, predict_rdf))
+      colnames(tablo)=c("Prediction","REEL","N")
+      ggplot(data = tablo , mapping = aes(x = Prediction , y =REEL )) +
+        geom_tile(aes(fill = N), colour = "white") +
+        geom_text(aes(label = sprintf("%1.0f", N)), vjust = 1) +
+        scale_fill_gradient(low = "blue", high = "red") +
+        theme_bw() + theme(legend.position = "none")
+    }
+    
+    else if (arg==1){data.frame(Accuracy, Precision, Recall, f1, Specificity)}
+    
+    else if (arg==2) { 
+      # ROC-AUC Curve
+      ROCPred <- prediction(predict_rdf, test[, input$variabletarget])
+      ROCPer <- performance(ROCPred, measure = "tpr",x.measure = "fpr")
+      
+      auc <- performance(ROCPred, measure = "auc")
+      auc <- auc@y.values[[1]]
+      auc
+      
+      # Plotting curve
+      plot(ROCPer, colorize = TRUE, 
+           print.cutoffs.at = seq(0.1, by = 0.1), 
+           main = "ROC CURVE")
+      abline(a = 0, b = 1)
+      
+      auc <- round(auc, 4)
+      legend(.6, .4, auc, title = "AUC", cex = 1)
+      
+    }
+    
+    else {
+      {
+        # Features Importance using the package vip
+        
+        fi_lr <- varImpPlot(df.rf)
+        print(fi_lr)
+        p1 <- vip(df.rf) + ggtitle("random forest")
+        # Display plots in a grid
+        grid.arrange(p1)
+      }
+    }
+  }
+  
+  output$lr <- renderPlot({
+    random_frst(arg = NULL)
+  })
+  output$lr2 <- renderTable({
+    random_frst(arg = 1)
+  })
+  output$lr3 <- renderPlot({
+    random_frst(arg=2)
+  })
+  output$lr4 <- renderPlot({
+    random_frst(arg=3)
+  }) 
   
 }
