@@ -34,7 +34,7 @@ library(imputeTS)
 # et une troisième partie conistant à l'entrainement de modèles pour faire la prédiction.
 
 ui <- dashboardPage(
-  dashboardHeader(title = "DData Analysis application"),
+  dashboardHeader(title = "AAApplication d'analyse de donnees"),
   
   dashboardSidebar(
     sidebarMenu(
